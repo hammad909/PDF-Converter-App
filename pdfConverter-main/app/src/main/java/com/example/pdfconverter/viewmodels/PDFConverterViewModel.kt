@@ -121,8 +121,6 @@ class PdfConverterViewModel : ViewModel() {
         }
     }
 
-
-
     @RequiresApi(Build.VERSION_CODES.Q)
     fun mergeSelectedPdfs(context: Context, uris: List<Uri>, fileName: String) {
         viewModelScope.launch {
@@ -146,7 +144,6 @@ class PdfConverterViewModel : ViewModel() {
             _isSplitting.value = false
         }
     }
-
 
 
     fun clearSplitResult() {

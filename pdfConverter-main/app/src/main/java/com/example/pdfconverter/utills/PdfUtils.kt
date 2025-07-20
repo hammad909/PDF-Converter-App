@@ -45,27 +45,35 @@ object PdfUtil {
 
     //for txt
     @RequiresApi(Build.VERSION_CODES.Q)
-    fun saveTextToDownloads(context: Context, fileName: String, content: String) {
-        val resolver = context.contentResolver
-        val contentValues = ContentValues().apply {
-            put(MediaStore.Downloads.DISPLAY_NAME, fileName)
-            put(MediaStore.Downloads.MIME_TYPE, "text/plain")
-            put(MediaStore.Downloads.IS_PENDING, 1)
-        }
-
-        val collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
-        val itemUri = resolver.insert(collection, contentValues)
-
-        itemUri?.let { uri ->
-            resolver.openOutputStream(uri).use { stream: OutputStream? ->
-                stream?.write(content.toByteArray())
+    fun saveTextToDownloads(context: Context, fileName: String, content: String): Boolean {
+        return try {
+            val resolver = context.contentResolver
+            val contentValues = ContentValues().apply {
+                put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+                put(MediaStore.Downloads.MIME_TYPE, "text/plain")
+                put(MediaStore.Downloads.IS_PENDING, 1)
             }
-            contentValues.clear()
-            contentValues.put(MediaStore.Downloads.IS_PENDING, 0)
-            resolver.update(uri, contentValues, null, null)
-            Toast.makeText(context, "Saved as $fileName", Toast.LENGTH_SHORT).show()
-        } ?: Toast.makeText(context, "Failed to save file", Toast.LENGTH_SHORT).show()
+
+            val collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+            val itemUri = resolver.insert(collection, contentValues)
+
+            if (itemUri != null) {
+                resolver.openOutputStream(itemUri).use { stream: OutputStream? ->
+                    stream?.write(content.toByteArray())
+                }
+                contentValues.clear()
+                contentValues.put(MediaStore.Downloads.IS_PENDING, 0)
+                resolver.update(itemUri, contentValues, null, null)
+                true
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
     }
+
 
 
     //for word docx
@@ -128,7 +136,9 @@ object PdfUtil {
                         val slideMaster = ppt.slideMasters[0]
 
                         for (pageText in content) {
-                            val slide = ppt.createSlide(slideMaster.getLayout(org.apache.poi.xslf.usermodel.SlideLayout.TITLE_AND_CONTENT))
+                            val slide = ppt.createSlide(
+                                slideMaster.getLayout(org.apache.poi.xslf.usermodel.SlideLayout.TITLE_AND_CONTENT)
+                            )
                             val shapes = slide.shapes
                             if (shapes.isNotEmpty()) {
                                 val shape = shapes[0]
@@ -147,19 +157,18 @@ object PdfUtil {
                 contentValues.clear()
                 contentValues.put(MediaStore.Downloads.IS_PENDING, 0)
                 resolver.update(uri, contentValues, null, null)
-
-                Toast.makeText(context, "Saved as $fileName", Toast.LENGTH_SHORT).show()
-            } ?: Toast.makeText(context, "Failed to save PPT", Toast.LENGTH_SHORT).show()
+            }
         } catch (e: Exception) {
-            Toast.makeText(context, "Error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+            // Handle silently or log if needed
         }
     }
 
 
+
     //for rtf
     @RequiresApi(Build.VERSION_CODES.Q)
-    fun saveTextAsRtfToDownloads(context: Context, fileName: String, content: String) {
-        try {
+    fun saveTextAsRtfToDownloads(context: Context, fileName: String, content: String): Boolean {
+        return try {
             val resolver = context.contentResolver
             val contentValues = ContentValues().apply {
                 put(MediaStore.Downloads.DISPLAY_NAME, fileName)
@@ -170,8 +179,8 @@ object PdfUtil {
             val collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
             val itemUri = resolver.insert(collection, contentValues)
 
-            itemUri?.let { uri ->
-                resolver.openOutputStream(uri).use { stream ->
+            if (itemUri != null) {
+                resolver.openOutputStream(itemUri).use { stream ->
                     if (stream != null) {
                         val rtfContent = "{\\rtf1\\ansi\\deff0\\n${content.replace("\n", "\\line ")} }"
                         stream.write(rtfContent.toByteArray())
@@ -180,11 +189,14 @@ object PdfUtil {
 
                 contentValues.clear()
                 contentValues.put(MediaStore.Downloads.IS_PENDING, 0)
-                resolver.update(uri, contentValues, null, null)
-                Toast.makeText(context, "Saved as $fileName", Toast.LENGTH_SHORT).show()
-            } ?: Toast.makeText(context, "Failed to save RTF", Toast.LENGTH_SHORT).show()
+                resolver.update(itemUri, contentValues, null, null)
+                true
+            } else {
+                false
+            }
         } catch (e: Exception) {
-            Toast.makeText(context, "Error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+            e.printStackTrace()
+            false
         }
     }
 
@@ -220,19 +232,22 @@ object PdfUtil {
                 contentValues.clear()
                 contentValues.put(MediaStore.Downloads.IS_PENDING, 0)
                 resolver.update(uri, contentValues, null, null)
-                Toast.makeText(context, "Saved as $fileName", Toast.LENGTH_SHORT).show()
-            } ?: Toast.makeText(context, "Failed to save DOC", Toast.LENGTH_SHORT).show()
+            }
         } catch (e: Exception) {
-            Toast.makeText(context, "Error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+            // Error handled silently, no toast
         }
     }
+
 
     //for html
     @RequiresApi(Build.VERSION_CODES.Q)
     fun saveHtmlToDownloads(context: Context, fileName: String, htmlContent: String) {
         val resolver = context.contentResolver
         val contentValues = ContentValues().apply {
-            put(MediaStore.Downloads.DISPLAY_NAME, if (fileName.endsWith(".html")) fileName else "$fileName.html")
+            put(
+                MediaStore.Downloads.DISPLAY_NAME,
+                if (fileName.endsWith(".html")) fileName else "$fileName.html"
+            )
             put(MediaStore.Downloads.MIME_TYPE, "text/html")
             put(MediaStore.Downloads.IS_PENDING, 1)
         }
@@ -247,8 +262,7 @@ object PdfUtil {
             contentValues.clear()
             contentValues.put(MediaStore.Downloads.IS_PENDING, 0)
             resolver.update(uri, contentValues, null, null)
-            Toast.makeText(context, "Saved as ${fileName}.html", Toast.LENGTH_SHORT).show()
-        } ?: Toast.makeText(context, "Failed to save HTML file", Toast.LENGTH_SHORT).show()
+        }
     }
 
 
@@ -344,8 +358,6 @@ object PdfUtil {
         reader.close()
         return@withContext fileNames
     }
-
-
 
 
 }
