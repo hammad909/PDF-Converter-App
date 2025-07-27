@@ -75,7 +75,7 @@ dependencies {
     //for coroutine
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
 
-    //for docx
+    //for docx/ppt/doc
     implementation("org.apache.poi:poi-ooxml:5.2.3")
     implementation("org.apache.poi:poi-scratchpad:5.2.3")
     

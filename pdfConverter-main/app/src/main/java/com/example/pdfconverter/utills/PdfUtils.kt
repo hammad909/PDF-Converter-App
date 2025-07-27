@@ -46,17 +46,28 @@ object PdfUtil {
     //for txt
     @RequiresApi(Build.VERSION_CODES.Q)
     fun saveTextToDownloads(context: Context, fileName: String, content: String): Boolean {
+
         return try {
+            // Get the ContentResolver to interact with the system file storage
             val resolver = context.contentResolver
+
+            // Define metadata (name, type, status) for the new file
             val contentValues = ContentValues().apply {
+                // Set the file name (e.g., "myTextFile.txt")
                 put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+                // Set the MIME type to plain text
                 put(MediaStore.Downloads.MIME_TYPE, "text/plain")
+                // Set IS_PENDING to 1 to indicate the file is being written
                 put(MediaStore.Downloads.IS_PENDING, 1)
             }
 
+            // Get the URI for the primary external downloads directory
             val collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+
+            // Insert a new file entry in the Downloads collection and get its Uri
             val itemUri = resolver.insert(collection, contentValues)
 
+            // If the Uri was successfully created
             if (itemUri != null) {
                 resolver.openOutputStream(itemUri).use { stream: OutputStream? ->
                     stream?.write(content.toByteArray())
@@ -107,10 +118,10 @@ object PdfUtil {
                 contentValues.clear()
                 contentValues.put(MediaStore.Downloads.IS_PENDING, 0)
                 resolver.update(uri, contentValues, null, null)
-                Toast.makeText(context, "Saved as $fileName", Toast.LENGTH_SHORT).show()
-            } ?: Toast.makeText(context, "Failed to save Word file", Toast.LENGTH_SHORT).show()
+            /*    Toast.makeText(context, "Saved as $fileName", Toast.LENGTH_SHORT).show()*/
+            } /*?: Toast.makeText(context, "Failed to save Word file", Toast.LENGTH_SHORT).show()*/
         } catch (e: Exception) {
-            Toast.makeText(context, "Error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+      /*      Toast.makeText(context, "Error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()*/
         }
     }
 
@@ -162,7 +173,6 @@ object PdfUtil {
             // Handle silently or log if needed
         }
     }
-
 
 
     //for rtf

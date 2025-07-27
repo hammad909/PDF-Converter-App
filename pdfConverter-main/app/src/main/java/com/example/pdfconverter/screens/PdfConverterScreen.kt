@@ -166,6 +166,7 @@ fun PdfPickerScreen(
                     IconButton(onClick = {
                         convertedMessage = null
                         showSuccessMessage = false
+                        stateViewModel.clearSelectedPdf()
                     }) {
                         Icon(
                             imageVector = Icons.Default.Close,
