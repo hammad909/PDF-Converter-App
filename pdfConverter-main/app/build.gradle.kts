@@ -11,6 +11,7 @@ android {
     defaultConfig {
         applicationId = "com.example.pdfconverter"
         minSdk = 26
+        //noinspection OldTargetApi
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -69,7 +70,7 @@ dependencies {
     implementation ("androidx.documentfile:documentfile:1.1.0")
 
     //for reading file data
-    implementation("com.itextpdf:itextpdf:5.5.13.4")
+    implementation("com.itextpdf:itext7-core:9.2.0")
 
 
     //for coroutine
@@ -84,9 +85,5 @@ dependencies {
 
     //for icons
     implementation ("androidx.compose.material:material-icons-extended:1.7.8")
-
-    //for viewing pdf
-    implementation("com.google.accompanist:accompanist-pager:0.34.0")
-
 
 }
